@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FonoClinic - Gerenciamento de Consultas</title>
+    
+    <!-- Favicon Links -->
+    <link rel="icon" type="image/png" href="/favicon-48x48.png" sizes="48x48" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>FonoClinic - Gerenciamento de Consultas</h1>
+
+        <form id="appointment-form">
+            <input type="text" id="patient-name" placeholder="Nome do Paciente" required>
+            <input type="text" id="responsible" placeholder="Responsável">
+            <input type="number" id="age" placeholder="Idade">
+            <input type="tel" id="phone" placeholder="Número de Telefone">
+            <select id="specialist-type">
+                <option value="Fonoaudiólogo">Fonoaudiólogo</option>
+                <option value="Psicólogo">Psicólogo</option>
+                <option value="Logoterapeuta">Logoterapeuta</option>
+                <option value="Massagista">Massagista</option>
+            </select>
+            <input type="text" id="specialist-name" placeholder="Nome do Especialista" required>
+            <input type="text" id="recommendations" placeholder="Como conheceu a clínica (Instagram, etc)">
+            <select id="consultorio">
+                <option value="1">Consultório 1</option>
+                <option value="2">Consultório 2</option>
+                <option value="3">Consultório 3</option>
+                <option value="4">Consultório 4</option>
+                <option value="5">Consultório 5</option>
+            </select>
+            <input type="date" id="appointment-date" required>
+            <input type="time" id="appointment-time" min="08:00" max="19:00" required>
+            <button type="submit">Salvar Consulta</button>
+        </form>
+
+        <!-- Seção das abas -->
+        <div class="tabs">
+            <button id="today-tab">Hoje</button>
+            <button id="appointments-tab">Consultas</button>
+        </div>
+
+        <!-- Classificação por Dia, Mês e Ano -->
+        <div class="classification">
+            <h3>Classificação de Consultas</h3>
+            <input type="number" id="classify-day" placeholder="Dia (1-31)">
+            <input type="number" id="classify-month" placeholder="Mês (1-12)">
+            <input type="number" id="classify-year" placeholder="Ano">
+            <button id="classify-btn">Classificar</button>
+        </div>
+
+        <!-- Exibição das consultas -->
+        <div id="today-consultations" class="consultations-section hidden"></div>
+        <div id="monthly-consultations" class="consultations-section hidden"></div>
+        <div id="classified-consultations" class="consultations-section hidden"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
