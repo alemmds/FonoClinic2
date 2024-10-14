@@ -65,3 +65,26 @@ button:hover {
 .hidden {
     display: none;
 }
+
+.month-header {
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #eee;
+    padding: 10px;
+    border: 1px solid #ccc;
+    margin: 5px 0;
+}
+
+.arrow {
+    transition: transform 0.3s;
+}
+
+.arrow-rotated {
+    transform: rotate(180deg);
+}
+
+.appointment-list {
+    display: none;
+}
