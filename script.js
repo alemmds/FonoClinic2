@@ -53,105 +53,138 @@ document.addEventListener('DOMContentLoaded', function () {
         todayConsultationsContainer.innerHTML = ''; // Limpar conteúdo existente
         if (todayAppointments.length === 0) {
             todayConsultationsContainer.innerHTML = '<p>Nenhuma consulta encontrada para hoje.</p>';
-        } else {
+        } else {            
             todayAppointments.forEach((appointment, index) => {
-                const div = document.createElement('div');
-                div.classList.add('appointment-item');
-                div.innerHTML = `
+                const appointmentItem = document.createElement('div');
+                appointmentItem.classList.add('appointment-item');
+                appointmentItem.innerHTML = `
                     <p><strong>Paciente:</strong> ${appointment.patientName}</p>
                     <p><strong>Responsável:</strong> ${appointment.responsible}</p>
                     <p><strong>Idade:</strong> ${appointment.age}</p>
                     <p><strong>Telefone:</strong> ${appointment.phone}</p>
-                    <p><strong>Especialista:</strong> ${appointment.specialistType} - ${appointment.specialistName}</p>
+                    <p><strong>Especialista:</strong> ${appointment.specialistName} (${appointment.specialistType})</p>
                     <p><strong>Consultório:</strong> ${appointment.consultorio}</p>
-                    <p><strong>Recomendações:</strong> ${appointment.recommendations}</p>
-                    <p><strong>Data da Consulta:</strong> ${appointment.appointmentDate}</p>
-                    <p><strong>Horário:</strong> ${appointment.appointmentTime}</p>
-                    <button onclick="editAppointment(${index})">Alterar</button>
-                    <button onclick="deleteAppointment(${index})">Excluir</button>
+                    <p><strong>Data:</strong> ${appointment.appointmentDate}</p>
+                    <p><strong>Hora:</strong> ${appointment.appointmentTime}</p>
+                    <button class="edit-btn" data-index="${index}">Alterar</button>
+                    <button class="delete-btn" data-index="${index}">Excluir</button>
                 `;
-                todayConsultationsContainer.appendChild(div);
+                todayConsultationsContainer.appendChild(appointmentItem);
             });
         }
+
         todayConsultationsContainer.classList.remove('hidden');
         classifiedConsultationsContainer.classList.add('hidden');
     }
 
     function showMonthlyAppointments() {
         const appointments = JSON.parse(localStorage.getItem('appointments')) || [];
-        const months = Array.from({length: 12}, (_, i) => appointments.filter(app => new Date(app.appointmentDate).getMonth() === i));
+        const months = Array.from({ length: 12 }, (_, i) => i + 1); // Meses de 1 a 12
         const monthlyContainer = document.getElementById('monthly-consultations');
-        monthlyContainer.innerHTML = '';
 
-        months.forEach((appointments, monthIndex) => {
-            const monthDiv = document.createElement('div');
-            monthDiv.innerHTML = `<h4>Mês ${monthIndex + 1}</h4>`;
-            if (appointments.length === 0) {
-                monthDiv.innerHTML += '<p>Nenhuma consulta encontrada para este mês.</p>';
-            } else {
-                appointments.sort((a, b) => new Date(a.appointmentDate) - new Date(b.appointmentDate)); // Ordenar por data
-                appointments.forEach((appointment, index) => {
-                    const div = document.createElement('div');
-                    div.classList.add('appointment-item');
-                    div.innerHTML = `
+        monthlyContainer.innerHTML = ''; // Limpar consultas anteriores
+
+        months.forEach(month => {
+            const monthHeader = document.createElement('div');
+            monthHeader.classList.add('month-header');
+            monthHeader.innerHTML = `<span>Mês ${month}</span> <span class="arrow">▼</span>`;
+
+            const appointmentList = document.createElement('div');
+            appointmentList.classList.add('appointment-list');
+
+            const appointmentsForMonth = appointments.filter(appointment => {
+                const appointmentMonth = new Date(appointment.appointmentDate).getMonth() + 1;
+                return appointmentMonth === month;
+            });
+
+            if (appointmentsForMonth.length > 0) {
+                appointmentsForMonth.forEach((appointment, index) => {
+                    const appointmentItem = document.createElement('div');
+                    appointmentItem.classList.add('appointment-item');
+                    appointmentItem.innerHTML = `
                         <p><strong>Paciente:</strong> ${appointment.patientName}</p>
-                        <p><strong>Data da Consulta:</strong> ${appointment.appointmentDate}</p>
-                        <p><strong>Horário:</strong> ${appointment.appointmentTime}</p>
-                        <button onclick="editAppointment(${index})">Alterar</button>
-                        <button onclick="deleteAppointment(${index})">Excluir</button>
+                        <p><strong>Responsável:</strong> ${appointment.responsible}</p>
+                        <p><strong>Idade:</strong> ${appointment.age}</p>
+                        <p><strong>Telefone:</strong> ${appointment.phone}</p>
+                        <p><strong>Especialista:</strong> ${appointment.specialistName} (${appointment.specialistType})</p>
+                        <p><strong>Consultório:</strong> ${appointment.consultorio}</p>
+                        <p><strong>Data:</strong> ${appointment.appointmentDate}</p>
+                        <p><strong>Hora:</strong> ${appointment.appointmentTime}</p>
+                        <button class="edit-btn" data-index="${index}">Alterar</button>
+                        <button class="delete-btn" data-index="${index}">Excluir</button>
                     `;
-                    monthDiv.appendChild(div);
+                    appointmentList.appendChild(appointmentItem);
                 });
+            } else {
+                appointmentList.innerHTML = `<p>Nenhuma consulta encontrada para o Mês ${month}.</p>`;
             }
-            monthlyContainer.appendChild(monthDiv);
+
+            monthHeader.addEventListener('click', function () {
+                appointmentList.style.display = appointmentList.style.display === 'none' ? 'block' : 'none';
+                const arrow = monthHeader.querySelector('.arrow');
+                arrow.classList.toggle('arrow-rotated');
+            });
+
+            monthlyContainer.appendChild(monthHeader);
+            monthlyContainer.appendChild(appointmentList);
         });
 
         monthlyContainer.classList.remove('hidden');
         todayConsultationsContainer.classList.add('hidden');
-        classifiedConsultationsContainer.classList.add('hidden');
     }
 
     function classifyAppointments() {
         const day = classifyDayInput.value;
-        const month = classifyMonthInput.value - 1; // De 1 a 12 para 0 a 11
+        const month = classifyMonthInput.value;
         const year = classifyYearInput.value;
 
         const appointments = JSON.parse(localStorage.getItem('appointments')) || [];
-        const classifiedAppointments = appointments.filter(app => {
-            const date = new Date(app.appointmentDate);
-            return date.getDate() === Number(day) && date.getMonth() === month && date.getFullYear() === Number(year);
+        const classifiedAppointments = appointments.filter(appointment => {
+            const appointmentDate = new Date(appointment.appointmentDate);
+            return appointmentDate.getDate() == day &&
+                (appointmentDate.getMonth() + 1) == month &&
+                appointmentDate.getFullYear() == year;
         });
-        classifiedAppointments.sort((a, b) => new Date(a.appointmentTime) - new Date(b.appointmentTime)); // Ordenar por horário
 
-        classifiedConsultationsContainer.innerHTML = ''; // Limpar conteúdo existente
+        classifiedConsultationsContainer.innerHTML = ''; // Limpar consultas anteriores
+
         if (classifiedAppointments.length === 0) {
-            classifiedConsultationsContainer.innerHTML = '<p>Nenhuma consulta encontrada para esta classificação.</p>';
+            classifiedConsultationsContainer.innerHTML = '<p>Nenhuma consulta encontrada para essa data.</p>';
         } else {
             classifiedAppointments.forEach((appointment, index) => {
-                const div = document.createElement('div');
-                div.classList.add('appointment-item');
-                div.innerHTML = `
+                const appointmentItem = document.createElement('div');
+                appointmentItem.classList.add('appointment-item');
+                appointmentItem.innerHTML = `
                     <p><strong>Paciente:</strong> ${appointment.patientName}</p>
                     <p><strong>Responsável:</strong> ${appointment.responsible}</p>
                     <p><strong>Idade:</strong> ${appointment.age}</p>
                     <p><strong>Telefone:</strong> ${appointment.phone}</p>
-                    <p><strong>Especialista:</strong> ${appointment.specialistType} - ${appointment.specialistName}</p>
+                    <p><strong>Especialista:</strong> ${appointment.specialistName} (${appointment.specialistType})</p>
                     <p><strong>Consultório:</strong> ${appointment.consultorio}</p>
-                    <p><strong>Recomendações:</strong> ${appointment.recommendations}</p>
-                    <p><strong>Data da Consulta:</strong> ${appointment.appointmentDate}</p>
-                    <p><strong>Horário:</strong> ${appointment.appointmentTime}</p>
-                    <button onclick="editAppointment(${index})">Alterar</button>
-                    <button onclick="deleteAppointment(${index})">Excluir</button>
+                    <p><strong>Data:</strong> ${appointment.appointmentDate}</p>
+                    <p><strong>Hora:</strong> ${appointment.appointmentTime}</p>
+                    <button class="edit-btn" data-index="${index}">Alterar</button>
+                    <button class="delete-btn" data-index="${index}">Excluir</button>
                 `;
-                classifiedConsultationsContainer.appendChild(div);
+                classifiedConsultationsContainer.appendChild(appointmentItem);
             });
         }
+
         classifiedConsultationsContainer.classList.remove('hidden');
-        todayConsultationsContainer.classList.add('hidden');
-        document.getElementById('monthly-consultations').classList.add('hidden');
     }
 
-    window.editAppointment = function(index) {
+    // Funções de alterar e excluir consultas
+    document.body.addEventListener('click', function (e) {
+        if (e.target.classList.contains('edit-btn')) {
+            const index = e.target.getAttribute('data-index');
+            editAppointment(index);
+        } else if (e.target.classList.contains('delete-btn')) {
+            const index = e.target.getAttribute('data-index');
+            deleteAppointment(index);
+        }
+    });
+
+    function editAppointment(index) {
         const appointments = JSON.parse(localStorage.getItem('appointments')) || [];
         const appointment = appointments[index];
 
@@ -166,14 +199,14 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('appointment-date').value = appointment.appointmentDate;
         document.getElementById('appointment-time').value = appointment.appointmentTime;
 
-        editingIndex = index; // Salvar o índice para edição
-    };
+        editingIndex = index;
+    }
 
-    window.deleteAppointment = function(index) {
-        const appointments = JSON.parse(localStorage.getItem('appointments')) || [];
-        appointments.splice(index, 1); // Remover a consulta
+    function deleteAppointment(index) {
+        let appointments = JSON.parse(localStorage.getItem('appointments')) || [];
+        appointments.splice(index, 1);
         localStorage.setItem('appointments', JSON.stringify(appointments));
-        showTodayAppointments(); // Atualizar a lista de consultas
-        showMonthlyAppointments(); // Atualizar a lista de consultas mensais
-    };
+        showTodayAppointments();
+    }
 });
+            
